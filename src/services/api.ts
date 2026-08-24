@@ -1,6 +1,6 @@
 import type { Province, Regency, District, Village } from '../types/region';
 
-const BASE_URL = 'https://emsifa.github.io/api-wilayah-indonesia/api';
+const BASE_URL = 'https://www.emsifa.com/api-wilayah-indonesia/api';
 
 // Memory & LocalStorage Cache Helpers
 const memoryCache = new Map<string, any>();

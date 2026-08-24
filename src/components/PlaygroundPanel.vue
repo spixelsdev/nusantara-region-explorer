@@ -9,7 +9,7 @@ const store = useRegionStore();
 const activeTab = ref<'curl' | 'js' | 'vue' | 'raw'>('curl');
 
 const currentApiEndpoint = computed(() => {
-  const base = 'https://emsifa.github.io/api-wilayah-indonesia/api';
+  const base = 'https://www.emsifa.com/api-wilayah-indonesia/api';
   switch (store.currentLevel) {
     case 'province': return `${base}/provinces.json`;
     case 'regency': return `${base}/regencies/${store.selectedProvince?.id}.json`;

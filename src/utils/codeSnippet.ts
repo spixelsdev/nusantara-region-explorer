@@ -1,5 +1,5 @@
 export function generateCurlSnippet(type: string, id?: string): string {
-  const base = 'https://emsifa.github.io/api-wilayah-indonesia/api';
+  const base = 'https://www.emsifa.com/api-wilayah-indonesia/api';
   switch (type) {
     case 'province':
       return `curl -s "${base}/provinces.json"`;
@@ -15,7 +15,7 @@ export function generateCurlSnippet(type: string, id?: string): string {
 }
 
 export function generateFetchSnippet(type: string, id?: string): string {
-  const base = 'https://emsifa.github.io/api-wilayah-indonesia/api';
+  const base = 'https://www.emsifa.com/api-wilayah-indonesia/api';
   const endpoint = type === 'province' 
     ? `${base}/provinces.json`
     : type === 'regency'
@@ -40,7 +40,7 @@ export function generateVueComposableSnippet(): string {
   return `// useIndonesiaRegion.ts
 import { ref } from 'vue';
 
-const BASE_URL = 'https://emsifa.github.io/api-wilayah-indonesia/api';
+const BASE_URL = 'https://www.emsifa.com/api-wilayah-indonesia/api';
 
 export function useIndonesiaRegion() {
   const provinces = ref([]);
