@@ -1,6 +1,7 @@
 export interface Province {
   id: string;
   name: string;
+  isDOB?: boolean;
 }
 
 export interface Regency {
@@ -23,9 +24,12 @@ export interface Village {
 
 export type RegionLevel = 'province' | 'regency' | 'district' | 'village';
 
-export interface SelectedRegionState {
-  province: Province | null;
-  regency: Regency | null;
-  district: District | null;
-  village: Village | null;
+export interface GlobalSearchResult {
+  id: string;
+  name: string;
+  level: RegionLevel;
+  parentName?: string;
+  provinceId?: string;
+  regencyId?: string;
+  districtId?: string;
 }

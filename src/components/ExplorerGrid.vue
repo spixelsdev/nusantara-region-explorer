@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRegionStore } from '../stores/regionStore';
-import { Search, MapPin, Loader2, ArrowRight, CheckCircle2 } from 'lucide-vue-next';
+import { Search, MapPin, Loader2, ArrowRight, CheckCircle2, Command } from 'lucide-vue-next';
 
 const store = useRegionStore();
 
@@ -40,15 +40,26 @@ const getLevelTitle = () => {
         </p>
       </div>
 
-      <!-- Search Input -->
-      <div class="relative w-full sm:w-72">
-        <Search class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-        <input 
-          v-model="store.searchQuery"
-          type="text" 
-          placeholder="Filter nama wilayah..." 
-          class="w-full pl-9 pr-3 py-1.5 text-xs bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-1 focus:ring-sky-500 focus:border-sky-500 text-slate-900 dark:text-slate-100"
-        />
+      <!-- Quick Filter & Command Palette trigger -->
+      <div class="flex items-center gap-2 w-full sm:w-auto">
+        <div class="relative w-full sm:w-64">
+          <Search class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input 
+            v-model="store.searchQuery"
+            type="text" 
+            placeholder="Filter list ini..." 
+            class="w-full pl-9 pr-3 py-1.5 text-xs bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-1 focus:ring-sky-500 focus:border-sky-500 text-slate-900 dark:text-slate-100"
+          />
+        </div>
+
+        <button 
+          @click="store.isCommandPaletteOpen = true"
+          class="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:border-slate-400 transition-colors"
+          title="Cari seluruh wilayah Indonesia (Ctrl+K)"
+        >
+          <Command class="w-3.5 h-3.5" />
+          <span class="font-mono text-[10px]">Ctrl+K</span>
+        </button>
       </div>
     </div>
 
@@ -74,7 +85,7 @@ const getLevelTitle = () => {
         v-for="item in store.filteredList" 
         :key="item.id"
         @click="handleSelect(item)"
-        class="flex items-center justify-between p-3 rounded border text-left transition-all duration-150 group"
+        class="flex items-center justify-between p-3 rounded border text-left transition-all duration-150 group relative"
         :class="[
           store.currentLevel === 'village' && store.selectedVillage?.id === item.id
             ? 'border-sky-500 bg-sky-50 dark:bg-sky-950/40 text-sky-900 dark:text-sky-200'
@@ -82,8 +93,13 @@ const getLevelTitle = () => {
         ]"
       >
         <div class="space-y-0.5 truncate pr-2">
-          <div class="text-xs font-semibold truncate group-hover:text-sky-600 dark:group-hover:text-sky-400">
-            {{ item.name }}
+          <div class="flex items-center gap-1.5">
+            <span class="text-xs font-semibold truncate group-hover:text-sky-600 dark:group-hover:text-sky-400">
+              {{ item.name }}
+            </span>
+            <span v-if="store.currentLevel === 'province' && (item as any).isDOB" class="shrink-0 px-1 py-0.2 rounded text-[9px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+              DOB
+            </span>
           </div>
           <div class="text-[10px] font-mono text-slate-400">
             KODE: {{ item.id }}

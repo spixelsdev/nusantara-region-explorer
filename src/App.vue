@@ -4,7 +4,8 @@ import { useRegionStore } from './stores/regionStore';
 import Breadcrumbs from './components/Breadcrumbs.vue';
 import ExplorerGrid from './components/ExplorerGrid.vue';
 import PlaygroundPanel from './components/PlaygroundPanel.vue';
-import { Sun, Moon, Database, Github, Check } from 'lucide-vue-next';
+import CommandPalette from './components/CommandPalette.vue';
+import { Sun, Moon, Database, Github, Check, Command } from 'lucide-vue-next';
 
 const store = useRegionStore();
 const isDark = ref(false);
@@ -45,7 +46,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 selection:bg-sky-500 selection:text-white">
+  <div class="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 selection:bg-sky-500 selection:text-white font-sans">
     <!-- Navbar Header (Clean Flat Style) -->
     <header class="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800">
       <div class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
@@ -59,13 +60,24 @@ onMounted(() => {
               Nusantara Region Explorer
             </h1>
             <p class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
-              Open Data Wilayah Indonesia API
+              Open Data Wilayah Indonesia API & DevPortal
             </p>
           </div>
         </div>
 
         <!-- Action Links -->
         <div class="flex items-center gap-2">
+          <!-- Command Palette Trigger Button -->
+          <button 
+            @click="store.isCommandPaletteOpen = true"
+            class="flex items-center gap-1.5 px-2.5 py-1.5 rounded border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs transition-colors"
+            title="Cari Wilayah Global (Ctrl+K)"
+          >
+            <Command class="w-3.5 h-3.5" />
+            <span class="hidden md:inline text-[11px]">Quick Search</span>
+            <kbd class="hidden md:inline px-1 py-0.2 rounded bg-slate-200 dark:bg-slate-800 font-mono text-[9px]">Ctrl+K</kbd>
+          </button>
+
           <!-- Theme Toggle -->
           <button 
             @click="toggleTheme" 
@@ -103,7 +115,7 @@ onMounted(() => {
             Eksplorasi Hirarki & Generator API Wilayah Indonesia
           </h2>
           <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl">
-            Pilih dan telusuri struktur administratif Indonesia secara bertingkat. Dilengkapi fitur export data dan snippet kode siap salin untuk integrasi form aplikasi web Anda.
+            Pilih dan telusuri struktur administratif Indonesia secara bertingkat. Dilengkapi fitur export data (JSON, CSV, SQL Dump), generator kode siap pakai (Vue, React, HTML), dan ORM Seeder.
           </p>
         </div>
 
@@ -132,6 +144,9 @@ onMounted(() => {
       <PlaygroundPanel />
     </main>
 
+    <!-- Command Palette (Ctrl + K) -->
+    <CommandPalette />
+
     <!-- Footer -->
     <footer class="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6 text-center text-xs text-slate-500 dark:text-slate-400 mt-12">
       <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -139,7 +154,7 @@ onMounted(() => {
           Open Source Project • Powered by <strong>EMSIFA Wilayah Indonesia API</strong>
         </p>
         <div class="flex items-center gap-4 text-xs">
-          <a href="https://emsifa.github.io/api-wilayah-indonesia/" target="_blank" rel="noopener noreferrer" class="hover:text-sky-600 dark:hover:text-sky-400 underline">
+          <a href="https://www.emsifa.com/api-wilayah-indonesia/" target="_blank" rel="noopener noreferrer" class="hover:text-sky-600 dark:hover:text-sky-400 underline">
             Dokumentasi Sumber API
           </a>
           <span>•</span>

@@ -2,7 +2,6 @@ import type { Province, Regency, District, Village } from '../types/region';
 
 const BASE_URL = 'https://www.emsifa.com/api-wilayah-indonesia/api';
 
-// Memory & LocalStorage Cache Helpers
 const memoryCache = new Map<string, any>();
 
 async function fetchWithCache<T>(url: string, cacheKey: string): Promise<T> {
@@ -18,12 +17,12 @@ async function fetchWithCache<T>(url: string, cacheKey: string): Promise<T> {
       return parsed;
     }
   } catch (e) {
-    // localStorage might be unavailable or disabled
+    // localStorage disabled/unavailable
   }
 
   const res = await fetch(url);
   if (!res.ok) {
-    throw new Error(`Failed to fetch from ${url}: ${res.statusText}`);
+    throw new Error(`Gagal mengambil data dari ${url}: ${res.statusText}`);
   }
   const data = await res.json();
   memoryCache.set(cacheKey, data);
@@ -31,7 +30,7 @@ async function fetchWithCache<T>(url: string, cacheKey: string): Promise<T> {
   try {
     localStorage.setItem(`nre_${cacheKey}`, JSON.stringify(data));
   } catch (e) {
-    // quota exceeded or storage disabled
+    // quota exceeded or disabled
   }
 
   return data;

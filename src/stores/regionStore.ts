@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import type { Province, Regency, District, Village, RegionLevel } from '../types/region';
+import type { Province, Regency, District, Village, RegionLevel, GlobalSearchResult } from '../types/region';
 import { regionApi } from '../services/api';
 
 export const useRegionStore = defineStore('region', () => {
@@ -20,12 +20,66 @@ export const useRegionStore = defineStore('region', () => {
   const loading = ref(false);
   const error = ref<string | null>(null);
 
-  // Actions
+  // Command Palette State
+  const isCommandPaletteOpen = ref(false);
+  const globalSearchQuery = ref('');
+  const isGlobalSearching = ref(false);
+
+  // URL Sync Helper
+  function updateUrlParams() {
+    const params = new URLSearchParams();
+    if (selectedProvince.value) params.set('prov', selectedProvince.value.id);
+    if (selectedRegency.value) params.set('kab', selectedRegency.value.id);
+    if (selectedDistrict.value) params.set('kec', selectedDistrict.value.id);
+    if (selectedVillage.value) params.set('des', selectedVillage.value.id);
+
+    const newUrl = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
+    window.history.replaceState({}, '', newUrl);
+  }
+
+  // Load Initial Provinces & Parse URL State
   async function loadProvinces() {
     loading.value = true;
     error.value = null;
     try {
-      provinces.value = await regionApi.getProvinces();
+      const data = await regionApi.getProvinces();
+      // Tag DOB if relevant
+      provinces.value = data.map(p => ({
+        ...p,
+        isDOB: ['92', '93', '95', '96'].includes(p.id)
+      }));
+
+      // Check URL Deep Linking params
+      const urlParams = new URLSearchParams(window.location.search);
+      const provId = urlParams.get('prov');
+      const kabId = urlParams.get('kab');
+      const kecId = urlParams.get('kec');
+      const desId = urlParams.get('des');
+
+      if (provId) {
+        const foundProv = provinces.value.find(p => p.id === provId);
+        if (foundProv) {
+          await selectProvince(foundProv, false);
+          if (kabId) {
+            const foundReg = regencies.value.find(r => r.id === kabId);
+            if (foundReg) {
+              await selectRegency(foundReg, false);
+              if (kecId) {
+                const foundDist = districts.value.find(d => d.id === kecId);
+                if (foundDist) {
+                  await selectDistrict(foundDist, false);
+                  if (desId) {
+                    const foundVil = villages.value.find(v => v.id === desId);
+                    if (foundVil) {
+                      selectVillage(foundVil, false);
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     } catch (err: any) {
       error.value = err.message || 'Gagal memuat data provinsi';
     } finally {
@@ -33,7 +87,7 @@ export const useRegionStore = defineStore('region', () => {
     }
   }
 
-  async function selectProvince(prov: Province) {
+  async function selectProvince(prov: Province, updateUrl = true) {
     selectedProvince.value = prov;
     selectedRegency.value = null;
     selectedDistrict.value = null;
@@ -43,6 +97,8 @@ export const useRegionStore = defineStore('region', () => {
     villages.value = [];
     currentLevel.value = 'regency';
     searchQuery.value = '';
+
+    if (updateUrl) updateUrlParams();
 
     loading.value = true;
     error.value = null;
@@ -55,7 +111,7 @@ export const useRegionStore = defineStore('region', () => {
     }
   }
 
-  async function selectRegency(reg: Regency) {
+  async function selectRegency(reg: Regency, updateUrl = true) {
     selectedRegency.value = reg;
     selectedDistrict.value = null;
     selectedVillage.value = null;
@@ -63,6 +119,8 @@ export const useRegionStore = defineStore('region', () => {
     villages.value = [];
     currentLevel.value = 'district';
     searchQuery.value = '';
+
+    if (updateUrl) updateUrlParams();
 
     loading.value = true;
     error.value = null;
@@ -75,12 +133,14 @@ export const useRegionStore = defineStore('region', () => {
     }
   }
 
-  async function selectDistrict(dist: District) {
+  async function selectDistrict(dist: District, updateUrl = true) {
     selectedDistrict.value = dist;
     selectedVillage.value = null;
     villages.value = [];
     currentLevel.value = 'village';
     searchQuery.value = '';
+
+    if (updateUrl) updateUrlParams();
 
     loading.value = true;
     error.value = null;
@@ -93,8 +153,9 @@ export const useRegionStore = defineStore('region', () => {
     }
   }
 
-  function selectVillage(vil: Village) {
+  function selectVillage(vil: Village, updateUrl = true) {
     selectedVillage.value = vil;
+    if (updateUrl) updateUrlParams();
   }
 
   function jumpToLevel(level: RegionLevel) {
@@ -112,6 +173,25 @@ export const useRegionStore = defineStore('region', () => {
     } else if (level === 'district') {
       selectedDistrict.value = null;
       selectedVillage.value = null;
+    }
+    updateUrlParams();
+  }
+
+  // Jump from global search result
+  async function jumpToResult(result: GlobalSearchResult) {
+    isCommandPaletteOpen.value = false;
+    globalSearchQuery.value = '';
+
+    if (result.level === 'province') {
+      const p = provinces.value.find(item => item.id === result.id);
+      if (p) await selectProvince(p);
+    } else if (result.level === 'regency' && result.provinceId) {
+      const p = provinces.value.find(item => item.id === result.provinceId);
+      if (p) {
+        await selectProvince(p, false);
+        const r = regencies.value.find(item => item.id === result.id);
+        if (r) await selectRegency(r);
+      }
     }
   }
 
@@ -142,6 +222,10 @@ export const useRegionStore = defineStore('region', () => {
     return parts.join(', ');
   });
 
+  const shareableUrl = computed(() => {
+    return window.location.href;
+  });
+
   return {
     provinces,
     regencies,
@@ -155,13 +239,18 @@ export const useRegionStore = defineStore('region', () => {
     searchQuery,
     loading,
     error,
+    isCommandPaletteOpen,
+    globalSearchQuery,
+    isGlobalSearching,
     filteredList,
     fullAddress,
+    shareableUrl,
     loadProvinces,
     selectProvince,
     selectRegency,
     selectDistrict,
     selectVillage,
-    jumpToLevel
+    jumpToLevel,
+    jumpToResult
   };
 });
