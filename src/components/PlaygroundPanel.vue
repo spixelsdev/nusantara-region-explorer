@@ -112,14 +112,14 @@ const copyShareLink = async () => {
 </script>
 
 <template>
-  <div class="mt-8 border border-slate-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-900 overflow-hidden font-sans">
-    <!-- Main Toolbar -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-950/60 border-b border-slate-200 dark:border-slate-800 gap-3">
+  <div class="mt-4 sm:mt-8 border border-slate-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-900 overflow-hidden font-sans">
+    <!-- Main Toolbar (Responsive Wrap) -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 border-b border-slate-200 dark:border-slate-800 gap-2.5 sm:gap-3">
       <!-- Section Selector Tabs -->
-      <div class="flex items-center gap-1.5 p-1 bg-slate-200/70 dark:bg-slate-800/80 rounded-md text-xs font-semibold">
+      <div class="flex items-center gap-1 p-1 bg-slate-200/70 dark:bg-slate-800/80 rounded-md text-xs font-semibold overflow-x-auto no-scrollbar">
         <button 
           @click="activeSection = 'api'; activeTab = 'curl'"
-          class="flex items-center gap-1.5 px-3 py-1 rounded transition-colors"
+          class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded transition-colors shrink-0 whitespace-nowrap"
           :class="activeSection === 'api' ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'"
         >
           <Terminal class="w-3.5 h-3.5 text-sky-500" />
@@ -127,7 +127,7 @@ const copyShareLink = async () => {
         </button>
         <button 
           @click="activeSection = 'components'; activeTab = 'vue-comp'"
-          class="flex items-center gap-1.5 px-3 py-1 rounded transition-colors"
+          class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded transition-colors shrink-0 whitespace-nowrap"
           :class="activeSection === 'components' ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'"
         >
           <Code2 class="w-3.5 h-3.5 text-indigo-500" />
@@ -135,7 +135,7 @@ const copyShareLink = async () => {
         </button>
         <button 
           @click="activeSection = 'db'; activeTab = 'sql'"
-          class="flex items-center gap-1.5 px-3 py-1 rounded transition-colors"
+          class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded transition-colors shrink-0 whitespace-nowrap"
           :class="activeSection === 'db' ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'"
         >
           <Database class="w-3.5 h-3.5 text-emerald-500" />
@@ -144,20 +144,20 @@ const copyShareLink = async () => {
       </div>
 
       <!-- Action Buttons -->
-      <div class="flex flex-wrap items-center gap-2">
+      <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
         <button 
           @click="copyShareLink"
-          class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
+          class="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
           title="Salin URL dengan filter wilayah aktif"
         >
           <Check v-if="copiedShare" class="w-3 h-3 text-emerald-500" />
           <Share2 v-else class="w-3 h-3 text-slate-500" />
-          <span>{{ copiedShare ? 'Link Tersalin' : 'Share Link' }}</span>
+          <span>{{ copiedShare ? 'Tersalin' : 'Share' }}</span>
         </button>
 
         <button 
           @click="exportJson"
-          class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
+          class="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
         >
           <Download class="w-3 h-3 text-sky-500" />
           <span>JSON</span>
@@ -165,7 +165,7 @@ const copyShareLink = async () => {
 
         <button 
           @click="exportCsv"
-          class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
+          class="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
         >
           <Download class="w-3 h-3 text-emerald-500" />
           <span>CSV</span>
@@ -173,53 +173,53 @@ const copyShareLink = async () => {
 
         <button 
           @click="exportSql"
-          class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
+          class="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
         >
           <FileCode2 class="w-3 h-3 text-amber-500" />
-          <span>SQL Dump</span>
+          <span>SQL</span>
         </button>
       </div>
     </div>
 
-    <!-- Active Endpoint Info Bar -->
-    <div class="px-3.5 py-2 bg-slate-100/50 dark:bg-slate-950/30 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 text-xs font-mono">
-      <div class="flex items-center gap-2 truncate">
-        <span class="px-1.5 py-0.5 rounded bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 font-bold text-[10px]">GET</span>
-        <span class="text-slate-600 dark:text-slate-400 truncate">{{ currentApiEndpoint }}</span>
+    <!-- Active Endpoint Info Bar (Mobile Truncate Safe) -->
+    <div class="px-3 sm:px-3.5 py-2 bg-slate-100/50 dark:bg-slate-950/30 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 text-xs font-mono">
+      <div class="flex items-center gap-1.5 sm:gap-2 truncate min-w-0">
+        <span class="px-1.5 py-0.5 rounded bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 font-bold text-[10px] shrink-0">GET</span>
+        <span class="text-slate-600 dark:text-slate-400 truncate text-[11px] sm:text-xs">{{ currentApiEndpoint }}</span>
       </div>
-      <span class="text-[11px] text-slate-400 shrink-0 font-sans">
+      <span class="text-[10px] sm:text-[11px] text-slate-400 shrink-0 font-sans hidden sm:inline">
         {{ store.filteredList.length }} baris aktif
       </span>
     </div>
 
-    <!-- Sub Navigation Tabs -->
-    <div class="p-3.5 space-y-3">
+    <!-- Sub Navigation Tabs (Scrollable on Mobile) -->
+    <div class="p-3 sm:p-3.5 space-y-3">
       <!-- API Tabs -->
-      <div v-if="activeSection === 'api'" class="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 text-xs">
+      <div v-if="activeSection === 'api'" class="flex items-center gap-1.5 sm:gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 text-xs overflow-x-auto no-scrollbar">
         <button 
           @click="activeTab = 'curl'"
-          class="px-2.5 py-1 rounded font-medium transition-colors"
+          class="px-2.5 py-1 rounded font-medium transition-colors shrink-0 whitespace-nowrap"
           :class="activeTab === 'curl' ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
         >
           cURL
         </button>
         <button 
           @click="activeTab = 'js'"
-          class="px-2.5 py-1 rounded font-medium transition-colors"
+          class="px-2.5 py-1 rounded font-medium transition-colors shrink-0 whitespace-nowrap"
           :class="activeTab === 'js' ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
         >
           Fetch (JS/TS)
         </button>
         <button 
           @click="activeTab = 'vue'"
-          class="px-2.5 py-1 rounded font-medium transition-colors"
+          class="px-2.5 py-1 rounded font-medium transition-colors shrink-0 whitespace-nowrap"
           :class="activeTab === 'vue' ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
         >
           Vue Composable
         </button>
         <button 
           @click="activeTab = 'raw'"
-          class="px-2.5 py-1 rounded font-medium transition-colors"
+          class="px-2.5 py-1 rounded font-medium transition-colors shrink-0 whitespace-nowrap"
           :class="activeTab === 'raw' ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
         >
           Live Preview (JSON)
@@ -227,24 +227,24 @@ const copyShareLink = async () => {
       </div>
 
       <!-- Component Tabs -->
-      <div v-else-if="activeSection === 'components'" class="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 text-xs">
+      <div v-else-if="activeSection === 'components'" class="flex items-center gap-1.5 sm:gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 text-xs overflow-x-auto no-scrollbar">
         <button 
           @click="activeTab = 'vue-comp'"
-          class="px-2.5 py-1 rounded font-medium transition-colors"
+          class="px-2.5 py-1 rounded font-medium transition-colors shrink-0 whitespace-nowrap"
           :class="activeTab === 'vue-comp' ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
         >
           Vue 3 Component
         </button>
         <button 
           @click="activeTab = 'react-comp'"
-          class="px-2.5 py-1 rounded font-medium transition-colors"
+          class="px-2.5 py-1 rounded font-medium transition-colors shrink-0 whitespace-nowrap"
           :class="activeTab === 'react-comp' ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
         >
           React Component
         </button>
         <button 
           @click="activeTab = 'vanilla-comp'"
-          class="px-2.5 py-1 rounded font-medium transition-colors"
+          class="px-2.5 py-1 rounded font-medium transition-colors shrink-0 whitespace-nowrap"
           :class="activeTab === 'vanilla-comp' ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
         >
           HTML Vanilla
@@ -252,17 +252,17 @@ const copyShareLink = async () => {
       </div>
 
       <!-- DB Tabs -->
-      <div v-else-if="activeSection === 'db'" class="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 text-xs">
+      <div v-else-if="activeSection === 'db'" class="flex items-center gap-1.5 sm:gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 text-xs overflow-x-auto no-scrollbar">
         <button 
           @click="activeTab = 'sql'"
-          class="px-2.5 py-1 rounded font-medium transition-colors"
+          class="px-2.5 py-1 rounded font-medium transition-colors shrink-0 whitespace-nowrap"
           :class="activeTab === 'sql' ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
         >
           SQL INSERT
         </button>
         <button 
           @click="activeTab = 'prisma'"
-          class="px-2.5 py-1 rounded font-medium transition-colors"
+          class="px-2.5 py-1 rounded font-medium transition-colors shrink-0 whitespace-nowrap"
           :class="activeTab === 'prisma' ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
         >
           Prisma Seed
@@ -270,7 +270,7 @@ const copyShareLink = async () => {
       </div>
 
       <!-- Code Contents -->
-      <div>
+      <div class="overflow-x-auto">
         <CodeBlock v-if="activeTab === 'curl'" :code="currentCurlCode" language="BASH" />
         <CodeBlock v-else-if="activeTab === 'js'" :code="currentJsCode" language="TYPESCRIPT" />
         <CodeBlock v-else-if="activeTab === 'vue'" :code="vueComposableCode" language="TYPESCRIPT" />

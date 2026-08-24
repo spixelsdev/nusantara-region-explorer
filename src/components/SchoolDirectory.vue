@@ -30,13 +30,12 @@ const selectedBentuk = ref<string>('ALL'); // ALL, SD, SMP, SMA, SMK, SLB
 const selectedStatus = ref<string>('ALL'); // ALL, N, S
 const copiedNpsn = ref<string | null>(null);
 
-// Determine search keyword: either user manual query, or active selected region
 const activeSearchContext = computed(() => {
   if (searchQuery.value.trim()) return searchQuery.value.trim();
   if (store.selectedDistrict) return store.selectedDistrict.name;
   if (store.selectedRegency) return store.selectedRegency.name.replace(/(KABUPATEN|KOTA)\s+/i, '');
   if (store.selectedProvince) return store.selectedProvince.name;
-  return 'Jakarta'; // default preview
+  return 'Jakarta';
 });
 
 const loadSchools = async (page = 1) => {
@@ -57,7 +56,6 @@ const loadSchools = async (page = 1) => {
   }
 };
 
-// Re-fetch when region selection changes or user triggers search
 watch([() => store.selectedDistrict, () => store.selectedRegency, () => store.selectedProvince], () => {
   searchQuery.value = '';
   loadSchools(1);
@@ -67,7 +65,6 @@ const handleManualSearch = () => {
   loadSchools(1);
 };
 
-// Filtered view by Bentuk & Status on client side
 const filteredSchools = computed(() => {
   return schools.value.filter(s => {
     const matchBentuk = selectedBentuk.value === 'ALL' || s.bentuk.toUpperCase() === selectedBentuk.value;
@@ -107,30 +104,30 @@ const getMapsUrl = (s: SchoolItem) => {
 <template>
   <div class="border border-slate-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-900 overflow-hidden font-sans space-y-0">
     <!-- Header Tooling -->
-    <div class="p-4 bg-slate-50 dark:bg-slate-950/60 border-b border-slate-200 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-3">
-      <div>
+    <div class="p-3.5 sm:p-4 bg-slate-50 dark:bg-slate-950/60 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="min-w-0">
         <div class="flex items-center gap-2">
-          <div class="p-1 rounded bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400">
+          <div class="p-1 rounded bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400 shrink-0">
             <GraduationCap class="w-4 h-4" />
           </div>
-          <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <span>Direktori Sekolah & NPSN Indonesia</span>
-            <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 font-semibold border border-amber-200 dark:border-amber-900">
-              215.000+ Sekolah
+          <h3 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 truncate">
+            <span>Direktori Sekolah & NPSN</span>
+            <span class="text-[9px] sm:text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 font-semibold border border-amber-200 dark:border-amber-900 shrink-0">
+              215.000+
             </span>
           </h3>
         </div>
-        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-          Menampilkan data sekolah di sekitar <strong class="text-slate-800 dark:text-slate-200">{{ activeSearchContext }}</strong> (Total: {{ totalData.toLocaleString('id-ID') }})
+        <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+          Sekitar <strong class="text-slate-800 dark:text-slate-200">{{ activeSearchContext }}</strong> (Total: {{ totalData.toLocaleString('id-ID') }})
         </p>
       </div>
 
       <!-- Action Buttons (Export) -->
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 shrink-0">
         <button 
           @click="exportSchoolJson"
           class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
-          title="Download data sekolah format JSON"
+          title="Download JSON"
         >
           <Download class="w-3 h-3 text-sky-500" />
           <span>JSON</span>
@@ -138,7 +135,7 @@ const getMapsUrl = (s: SchoolItem) => {
         <button 
           @click="exportSchoolCsv"
           class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
-          title="Download data sekolah format CSV"
+          title="Download CSV"
         >
           <Download class="w-3 h-3 text-emerald-500" />
           <span>CSV</span>
@@ -146,10 +143,10 @@ const getMapsUrl = (s: SchoolItem) => {
       </div>
     </div>
 
-    <!-- Filter & Search Bar -->
-    <div class="p-3.5 bg-slate-100/50 dark:bg-slate-950/30 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+    <!-- Filter & Search Bar (Responsive Wrapped) -->
+    <div class="p-3 sm:p-3.5 bg-slate-100/50 dark:bg-slate-950/30 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 text-xs">
       <!-- Search Input -->
-      <form @submit.prevent="handleManualSearch" class="relative flex-1 min-w-[240px] max-w-md flex items-center gap-2">
+      <form @submit.prevent="handleManualSearch" class="relative flex-1 flex items-center gap-2">
         <div class="relative w-full">
           <Search class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input 
@@ -161,21 +158,21 @@ const getMapsUrl = (s: SchoolItem) => {
         </div>
         <button 
           type="submit"
-          class="px-3 py-1.5 rounded bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold text-xs shrink-0"
+          class="px-3 py-1.5 rounded bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold text-xs shrink-0 active:scale-95"
         >
           Cari
         </button>
       </form>
 
       <!-- Filter Controls -->
-      <div class="flex items-center gap-2 flex-wrap">
+      <div class="flex items-center justify-between sm:justify-end gap-2 overflow-x-auto no-scrollbar">
         <!-- Jenjang Filter -->
-        <div class="flex items-center gap-1 bg-white dark:bg-slate-900 p-0.5 rounded border border-slate-300 dark:border-slate-700 text-[11px]">
+        <div class="flex items-center gap-0.5 bg-white dark:bg-slate-900 p-0.5 rounded border border-slate-300 dark:border-slate-700 text-[10px] sm:text-[11px] shrink-0">
           <button 
             v-for="b in ['ALL', 'SD', 'SMP', 'SMA', 'SMK']" 
             :key="b"
             @click="selectedBentuk = b"
-            class="px-2 py-0.5 rounded transition-colors"
+            class="px-1.5 sm:px-2 py-0.5 rounded transition-colors"
             :class="selectedBentuk === b ? 'bg-slate-200 dark:bg-slate-800 font-bold text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
           >
             {{ b }}
@@ -183,24 +180,24 @@ const getMapsUrl = (s: SchoolItem) => {
         </div>
 
         <!-- Status Filter -->
-        <div class="flex items-center gap-1 bg-white dark:bg-slate-900 p-0.5 rounded border border-slate-300 dark:border-slate-700 text-[11px]">
+        <div class="flex items-center gap-0.5 bg-white dark:bg-slate-900 p-0.5 rounded border border-slate-300 dark:border-slate-700 text-[10px] sm:text-[11px] shrink-0">
           <button 
             @click="selectedStatus = 'ALL'"
-            class="px-2 py-0.5 rounded transition-colors"
+            class="px-1.5 sm:px-2 py-0.5 rounded transition-colors"
             :class="selectedStatus === 'ALL' ? 'bg-slate-200 dark:bg-slate-800 font-bold text-slate-900 dark:text-white' : 'text-slate-500'"
           >
             Semua
           </button>
           <button 
             @click="selectedStatus = 'N'"
-            class="px-2 py-0.5 rounded transition-colors"
+            class="px-1.5 sm:px-2 py-0.5 rounded transition-colors"
             :class="selectedStatus === 'N' ? 'bg-emerald-100 dark:bg-emerald-950 font-bold text-emerald-700 dark:text-emerald-300' : 'text-slate-500'"
           >
             Negeri
           </button>
           <button 
             @click="selectedStatus = 'S'"
-            class="px-2 py-0.5 rounded transition-colors"
+            class="px-1.5 sm:px-2 py-0.5 rounded transition-colors"
             :class="selectedStatus === 'S' ? 'bg-amber-100 dark:bg-amber-950 font-bold text-amber-700 dark:text-amber-300' : 'text-slate-500'"
           >
             Swasta
@@ -210,29 +207,29 @@ const getMapsUrl = (s: SchoolItem) => {
     </div>
 
     <!-- School List Content -->
-    <div class="p-4 space-y-4">
+    <div class="p-3 sm:p-4 space-y-3 sm:space-y-4">
       <!-- Loading State -->
-      <div v-if="loading" class="flex flex-col items-center justify-center py-16 text-slate-400 gap-2 border border-dashed border-slate-200 dark:border-slate-800 rounded-md">
+      <div v-if="loading" class="flex flex-col items-center justify-center py-12 sm:py-16 text-slate-400 gap-2 border border-dashed border-slate-200 dark:border-slate-800 rounded-md">
         <Loader2 class="w-6 h-6 animate-spin text-amber-500" />
         <span class="text-xs">Mengambil data direktori sekolah...</span>
       </div>
 
       <!-- Error State -->
-      <div v-else-if="error" class="p-4 border border-rose-200 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 rounded-md text-xs">
+      <div v-else-if="error" class="p-3 sm:p-4 border border-rose-200 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 rounded-md text-xs">
         {{ error }}
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="filteredSchools.length === 0" class="py-12 text-center text-slate-400 border border-slate-200 dark:border-slate-800 rounded-md text-xs">
+      <div v-else-if="filteredSchools.length === 0" class="py-10 sm:py-12 text-center text-slate-400 border border-slate-200 dark:border-slate-800 rounded-md text-xs px-4">
         Tidak ditemukan sekolah dengan kata kunci "{{ activeSearchContext }}". Coba gunakan pencarian nama sekolah lain di atas.
       </div>
 
-      <!-- School Cards Grid (Clean Flat Aesthetic) -->
-      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+      <!-- School Cards Grid (Mobile 1-col, Tablet 2-col, Desktop 3-col) -->
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
         <div 
           v-for="s in filteredSchools" 
           :key="s.id || s.npsn"
-          class="p-3.5 rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 transition-colors flex flex-col justify-between space-y-2.5"
+          class="p-3 sm:p-3.5 rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 transition-colors flex flex-col justify-between space-y-2.5"
         >
           <div class="space-y-1.5">
             <!-- Top Badges -->
@@ -260,7 +257,7 @@ const getMapsUrl = (s: SchoolItem) => {
               <!-- NPSN Pill with Copy -->
               <button 
                 @click="copyNpsn(s.npsn)"
-                class="flex items-center gap-1 text-[10px] font-mono text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700"
+                class="flex items-center gap-1 text-[10px] font-mono text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 active:scale-95"
                 title="Salin NPSN"
               >
                 <span>NPSN: {{ s.npsn }}</span>
@@ -282,14 +279,14 @@ const getMapsUrl = (s: SchoolItem) => {
 
           <!-- Card Footer (Google Maps Link) -->
           <div class="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px]">
-            <span class="text-slate-400 font-mono text-[10px]">
+            <span class="text-slate-400 font-mono text-[10px] truncate max-w-[150px]">
               {{ s.propinsi }}
             </span>
             <a 
               :href="getMapsUrl(s)" 
               target="_blank" 
               rel="noopener noreferrer"
-              class="flex items-center gap-1 text-sky-600 dark:text-sky-400 hover:underline font-semibold"
+              class="flex items-center gap-1 text-sky-600 dark:text-sky-400 hover:underline font-semibold shrink-0"
             >
               <span>Lihat Maps</span>
               <ExternalLink class="w-3 h-3" />
@@ -298,17 +295,17 @@ const getMapsUrl = (s: SchoolItem) => {
         </div>
       </div>
 
-      <!-- Pagination -->
-      <div v-if="totalPages > 1" class="flex items-center justify-between pt-3 border-t border-slate-200 dark:border-slate-800 text-xs">
-        <span class="text-slate-500 dark:text-slate-400">
-          Halaman {{ currentPage }} dari {{ totalPages }} ({{ totalData }} sekolah)
+      <!-- Pagination (Mobile friendly) -->
+      <div v-if="totalPages > 1" class="flex flex-col sm:flex-row items-center justify-between gap-2.5 pt-3 border-t border-slate-200 dark:border-slate-800 text-xs">
+        <span class="text-slate-500 dark:text-slate-400 text-center sm:text-left">
+          Halaman {{ currentPage }} dari {{ totalPages }} ({{ totalData.toLocaleString('id-ID') }} sekolah)
         </span>
 
         <div class="flex items-center gap-1.5">
           <button 
             @click="loadSchools(currentPage - 1)" 
             :disabled="currentPage <= 1"
-            class="p-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 disabled:opacity-40 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
+            class="p-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 disabled:opacity-40 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 active:scale-95"
           >
             <ChevronLeft class="w-3.5 h-3.5" />
           </button>
@@ -316,7 +313,7 @@ const getMapsUrl = (s: SchoolItem) => {
           <button 
             @click="loadSchools(currentPage + 1)" 
             :disabled="currentPage >= totalPages"
-            class="p-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 disabled:opacity-40 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
+            class="p-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 disabled:opacity-40 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 active:scale-95"
           >
             <ChevronRight class="w-3.5 h-3.5" />
           </button>
