@@ -9,7 +9,8 @@ import {
   Check, 
   Copy, 
   ShieldAlert, 
-  PieChart
+  PieChart,
+  Users
 } from 'lucide-vue-next';
 
 const props = defineProps<{
@@ -20,11 +21,32 @@ const props = defineProps<{
 const emit = defineEmits(['close']);
 const store = useRegionStore();
 
-const studentCount = ref(320);
 const customJenjang = ref<'SD' | 'SMP' | 'SMA' | 'SMK' | 'SLB'>('SD');
+const selectedScale = ref<'small' | 'medium' | 'large'>('medium');
+const studentCount = ref(280);
 const copiedBreakdown = ref(false);
 
-// If school is selected, set initial jenjang
+// Preset mapping based on official Permendikbud rombel capacity
+const ROMBEL_PRESETS: Record<'SD' | 'SMP' | 'SMA' | 'SMK' | 'SLB', Record<'small' | 'medium' | 'large', number>> = {
+  SD: { small: 168, medium: 280, large: 504 },       // 6 rombel vs 10 rombel vs 18 rombel
+  SMP: { small: 288, medium: 480, large: 768 },      // 9 rombel vs 15 rombel vs 24 rombel
+  SMA: { small: 324, medium: 648, large: 972 },      // 9 rombel vs 18 rombel vs 27 rombel
+  SMK: { small: 432, medium: 756, large: 1296 },     // 12 rombel vs 21 rombel vs 36 rombel
+  SLB: { small: 30, medium: 60, large: 120 }
+};
+
+const applyPreset = (scale: 'small' | 'medium' | 'large') => {
+  selectedScale.value = scale;
+  studentCount.value = ROMBEL_PRESETS[customJenjang.value][scale];
+};
+
+// Switch jenjang & auto set realistic default student count
+const selectJenjang = (j: 'SD' | 'SMP' | 'SMA' | 'SMK' | 'SLB') => {
+  customJenjang.value = j;
+  studentCount.value = ROMBEL_PRESETS[j][selectedScale.value];
+};
+
+// When modal opens with targetSchool, detect its level and preset student count
 watch(() => props.targetSchool, (school) => {
   if (school) {
     const b = school.bentuk?.toUpperCase() as any;
@@ -33,6 +55,8 @@ watch(() => props.targetSchool, (school) => {
     } else {
       customJenjang.value = 'SD';
     }
+    // Set auto default capacity
+    studentCount.value = ROMBEL_PRESETS[customJenjang.value][selectedScale.value];
   }
 }, { immediate: true });
 
@@ -51,13 +75,19 @@ const calculation = computed(() => {
 
 const activeConfig = computed(() => BOS_CONFIG[customJenjang.value] || BOS_CONFIG['SD']);
 
+// Estimated rombel count display
+const estimatedRombel = computed(() => {
+  const maxPerClass = customJenjang.value === 'SD' ? 28 : customJenjang.value === 'SLB' ? 8 : 36;
+  return Math.max(1, Math.ceil(studentCount.value / maxPerClass));
+});
+
 const formattedSummaryText = computed(() => {
   const schoolName = props.targetSchool ? props.targetSchool.sekolah : `Sekolah ${customJenjang.value}`;
   const c = calculation.value;
   return `=== ESTIMASI ALOKASI DANA BOS / BOSP REGULER ===
 Nama: ${schoolName} (${customJenjang.value})
-Jumlah Siswa: ${studentCount.value} Siswa
-Indeks Daerah (IKK): ${ikkMultiplier.value}x
+Jumlah Siswa: ${studentCount.value} Siswa (Est. ${estimatedRombel.value} Rombel)
+Indeks Daerah (IKK): ${ikkMultiplier.value}x (${currentBudgetInfo.value.province_name})
 
 TOTAL ALOKASI TAHUNAN: ${formatRupiah(c.total_yearly)}
 - Penyaluran Tahap 1 (50%): ${formatRupiah(c.tahap_1)}
@@ -96,7 +126,7 @@ const copySummary = async () => {
               Kalkulator & Estimator Alokasi Dana BOS (BOSP)
             </h3>
             <p class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 truncate">
-              Formula Satuan Biaya Majemuk Daerah Resmi Kemendikbudristek
+              Formula Satuan Biaya Majemuk Daerah & Standar Rombel Dapodik Kemendikbud
             </p>
           </div>
         </div>
@@ -129,44 +159,84 @@ const copySummary = async () => {
         </div>
 
         <!-- Controls: Jenjang & Student Count -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-slate-50 dark:bg-slate-950 rounded border border-slate-200 dark:border-slate-800">
-          <div>
-            <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
-              Jenjang Pendidikan
-            </label>
-            <div class="flex items-center gap-1 bg-white dark:bg-slate-900 p-1 rounded border border-slate-300 dark:border-slate-700">
-              <button 
-                v-for="j in (['SD', 'SMP', 'SMA', 'SMK', 'SLB'] as const)" 
-                :key="j"
-                @click="customJenjang = j"
-                class="flex-1 py-1 text-[11px] font-semibold rounded transition-colors"
-                :class="customJenjang === j ? 'bg-amber-500 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
-              >
-                {{ j }}
-              </button>
+        <div class="space-y-3 p-3 bg-slate-50 dark:bg-slate-950 rounded border border-slate-200 dark:border-slate-800">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                Jenjang Pendidikan
+              </label>
+              <div class="flex items-center gap-1 bg-white dark:bg-slate-900 p-1 rounded border border-slate-300 dark:border-slate-700">
+                <button 
+                  v-for="j in (['SD', 'SMP', 'SMA', 'SMK', 'SLB'] as const)" 
+                  :key="j"
+                  @click="selectJenjang(j)"
+                  class="flex-1 py-1 text-[11px] font-semibold rounded transition-colors"
+                  :class="customJenjang === j ? 'bg-amber-500 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                >
+                  {{ j }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Quick Capacity Presets -->
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                Preset Skala Rombel (Dapodik)
+              </label>
+              <div class="flex items-center gap-1 bg-white dark:bg-slate-900 p-1 rounded border border-slate-300 dark:border-slate-700">
+                <button 
+                  @click="applyPreset('small')"
+                  class="flex-1 py-1 text-[10px] font-semibold rounded transition-colors"
+                  :class="selectedScale === 'small' ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white font-bold' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
+                >
+                  Kecil (1 Rombel)
+                </button>
+                <button 
+                  @click="applyPreset('medium')"
+                  class="flex-1 py-1 text-[10px] font-semibold rounded transition-colors"
+                  :class="selectedScale === 'medium' ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white font-bold' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
+                >
+                  Sedang (2-3 Rombel)
+                </button>
+                <button 
+                  @click="applyPreset('large')"
+                  class="flex-1 py-1 text-[10px] font-semibold rounded transition-colors"
+                  :class="selectedScale === 'large' ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white font-bold' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
+                >
+                  Besar (4+ Rombel)
+                </button>
+              </div>
             </div>
           </div>
 
-          <div>
-            <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1 flex items-center justify-between">
-              <span>Jumlah Peserta Didik (Siswa)</span>
-              <span class="font-mono font-bold text-amber-600 dark:text-amber-400">{{ studentCount }} Siswa</span>
-            </label>
-            <div class="space-y-1.5">
-              <input 
-                v-model.number="studentCount" 
-                type="number" 
-                min="10" 
-                max="2500" 
-                class="w-full text-xs px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
-              />
+          <!-- Student Slider & Exact Input -->
+          <div class="pt-2 border-t border-slate-200 dark:border-slate-800">
+            <div class="flex items-center justify-between text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+              <span class="flex items-center gap-1">
+                <Users class="w-3.5 h-3.5 text-amber-500" />
+                <span>Jumlah Peserta Didik Riil / Estimasi:</span>
+              </span>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] text-slate-400 font-normal">Est. ~{{ estimatedRombel }} Rombel</span>
+                <span class="font-mono font-bold text-amber-600 dark:text-amber-400 text-xs">{{ studentCount }} Siswa</span>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3">
               <input 
                 v-model.number="studentCount" 
                 type="range" 
-                min="20" 
-                max="1500" 
-                step="10" 
-                class="w-full accent-amber-500 cursor-pointer"
+                min="10" 
+                max="1800" 
+                step="5" 
+                class="flex-1 accent-amber-500 cursor-pointer"
+              />
+              <input 
+                v-model.number="studentCount" 
+                type="number" 
+                min="1" 
+                max="3000" 
+                class="w-20 text-xs px-2 py-1 text-center font-mono font-bold rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
               />
             </div>
           </div>
