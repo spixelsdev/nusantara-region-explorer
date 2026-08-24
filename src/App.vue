@@ -7,6 +7,9 @@ import PlaygroundPanel from './components/PlaygroundPanel.vue';
 import CommandPalette from './components/CommandPalette.vue';
 import AddressSandbox from './components/AddressSandbox.vue';
 import SchoolDirectory from './components/SchoolDirectory.vue';
+import RegionalBudgetPanel from './components/RegionalBudgetPanel.vue';
+import BosCalculatorModal from './components/BosCalculatorModal.vue';
+import type { SchoolItem } from './types/school';
 import { 
   Sun, 
   Moon, 
@@ -18,14 +21,19 @@ import {
   MapPin,
   GraduationCap,
   Terminal,
-  Search
+  Search,
+  Coins,
+  Calculator
 } from 'lucide-vue-next';
 
 const store = useRegionStore();
 const isDark = ref(false);
 const isSandboxOpen = ref(false);
+const isBosModalOpen = ref(false);
+const selectedSchoolForBos = ref<SchoolItem | null>(null);
 const copyFullAddressSuccess = ref(false);
-const activeTab = ref<'region' | 'schools' | 'dev'>('region');
+
+const activeTab = ref<'region' | 'schools' | 'budget' | 'dev'>('region');
 
 const toggleTheme = () => {
   isDark.value = !isDark.value;
@@ -45,6 +53,11 @@ const copyAddress = async () => {
   setTimeout(() => {
     copyFullAddressSuccess.value = false;
   }, 2000);
+};
+
+const openBosCalculator = (school: SchoolItem | null = null) => {
+  selectedSchoolForBos.value = school;
+  isBosModalOpen.value = true;
 };
 
 onMounted(() => {
@@ -73,10 +86,10 @@ onMounted(() => {
           </div>
           <div class="min-w-0">
             <h1 class="text-xs sm:text-sm font-bold tracking-tight text-slate-900 dark:text-white leading-tight truncate">
-              Nusantara Region Explorer
+              Nusantara Data Portal
             </h1>
             <p class="text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 font-mono truncate">
-              Open Data Wilayah & Sekolah Indonesia
+              Wilayah • Sekolah & BOS • Postur APBD
             </p>
           </div>
         </div>
@@ -142,25 +155,37 @@ onMounted(() => {
             </span>
             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-medium bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300">
               <GraduationCap class="w-3 h-3 shrink-0" />
-              <span>215k+ Sekolah (NPSN)</span>
+              <span>215k+ Sekolah & Dana BOS</span>
+            </span>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-medium bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
+              <Coins class="w-3 h-3 shrink-0" />
+              <span>Postur APBD & Fiskal</span>
             </span>
           </div>
 
           <h2 class="text-sm sm:text-lg font-bold text-slate-900 dark:text-white leading-snug">
-            Eksplorasi Data Wilayah & Direktori Sekolah Indonesia
+            Portal Data Wilayah, Pendidikan & Keuangan Daerah Indonesia
           </h2>
           <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-            Data administratif Indonesia hingga tingkat Desa serta data sekolah nasional. Dilengkapi export multi-format, generator komponen form (Vue/React/HTML), dan simulator format RT/RW.
+            Eksplorasi terpadu hierarki administratif wilayah, direktori sekolah nasional, kalkulator alokasi dana BOS (BOSP), dan postur anggaran daerah (APBD/TKD/Dana Desa).
           </p>
 
           <!-- Quick Actions -->
-          <div class="pt-0.5">
+          <div class="flex flex-wrap items-center gap-3 pt-0.5">
             <button 
               @click="isSandboxOpen = true" 
               class="inline-flex items-center gap-1 text-xs font-semibold text-sky-600 dark:text-sky-400 hover:underline"
             >
               <TestTube2 class="w-3.5 h-3.5" />
-              <span>Buka Address Sandbox (RT/RW Formatter) &rarr;</span>
+              <span>Address Sandbox (RT/RW)</span>
+            </button>
+            <span class="text-slate-300 dark:text-slate-700">•</span>
+            <button 
+              @click="openBosCalculator(null)" 
+              class="inline-flex items-center gap-1 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline"
+            >
+              <Calculator class="w-3.5 h-3.5" />
+              <span>Kalkulator Dana BOS &rarr;</span>
             </button>
           </div>
         </div>
@@ -197,8 +222,17 @@ onMounted(() => {
           :class="activeTab === 'schools' ? 'border-amber-600 dark:border-amber-400 text-amber-600 dark:text-amber-400 bg-amber-50/50 dark:bg-amber-950/30 rounded-t' : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
         >
           <GraduationCap class="w-3.5 h-3.5" />
-          <span>Direktori Sekolah</span>
+          <span>Direktori Sekolah & BOS</span>
           <span class="px-1.5 py-0.2 rounded bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 text-[10px] font-mono">215k</span>
+        </button>
+
+        <button 
+          @click="activeTab = 'budget'"
+          class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-bold border-b-2 transition-colors shrink-0 whitespace-nowrap"
+          :class="activeTab === 'budget' ? 'border-emerald-600 dark:border-emerald-400 text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-950/30 rounded-t' : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+        >
+          <Coins class="w-3.5 h-3.5" />
+          <span>Postur APBD & Fiskal</span>
         </button>
 
         <button 
@@ -213,19 +247,21 @@ onMounted(() => {
 
       <!-- Tab 1: Region Explorer -->
       <div v-show="activeTab === 'region'" class="space-y-4 sm:space-y-6">
-        <!-- Cascading Breadcrumbs Navigation -->
         <Breadcrumbs />
-
-        <!-- Region Items Grid Explorer -->
         <ExplorerGrid />
       </div>
 
       <!-- Tab 2: Schools Directory & NPSN Lookup -->
       <div v-show="activeTab === 'schools'">
-        <SchoolDirectory />
+        <SchoolDirectory @calculate-bos="openBosCalculator" />
       </div>
 
-      <!-- Tab 3: Developer & API Playground Panel -->
+      <!-- Tab 3: Regional APBD & Fiscal Posture -->
+      <div v-show="activeTab === 'budget'">
+        <RegionalBudgetPanel @open-bos-calc="openBosCalculator(null)" />
+      </div>
+
+      <!-- Tab 4: Developer & API Playground Panel -->
       <div v-show="activeTab === 'dev' || activeTab === 'region'">
         <PlaygroundPanel />
       </div>
@@ -237,11 +273,18 @@ onMounted(() => {
     <!-- Address & RT/RW Sandbox Modal -->
     <AddressSandbox :is-open="isSandboxOpen" @close="isSandboxOpen = false" />
 
+    <!-- Dana BOS Calculator Modal -->
+    <BosCalculatorModal 
+      :is-open="isBosModalOpen" 
+      :target-school="selectedSchoolForBos" 
+      @close="isBosModalOpen = false" 
+    />
+
     <!-- Footer -->
     <footer class="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6 text-center text-xs text-slate-500 dark:text-slate-400 mt-auto">
       <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
         <p class="text-center sm:text-left">
-          Open Source Project • Data Wilayah by <strong>EMSIFA API</strong> • Data Sekolah by <strong>Kemendikbud API</strong>
+          Open Source Portal • Data: <strong>Kemendagri</strong>, <strong>Kemendikbud</strong>, <strong>DJPK Kemenkeu</strong>
         </p>
         <div class="flex flex-wrap items-center justify-center gap-3 text-xs">
           <a href="https://www.emsifa.com/api-wilayah-indonesia/" target="_blank" rel="noopener noreferrer" class="hover:text-sky-600 dark:hover:text-sky-400 underline">
@@ -250,6 +293,10 @@ onMounted(() => {
           <span>•</span>
           <a href="https://github.com/wanrabbae/api-sekolah-indonesia" target="_blank" rel="noopener noreferrer" class="hover:text-amber-600 dark:hover:text-amber-400 underline">
             API Sekolah
+          </a>
+          <span>•</span>
+          <a href="https://djpk.kemenkeu.go.id/" target="_blank" rel="noopener noreferrer" class="hover:text-emerald-600 dark:hover:text-emerald-400 underline">
+            DJPK Kemenkeu
           </a>
           <span>•</span>
           <a href="https://github.com/spixelsdev/nusantara-region-explorer" target="_blank" rel="noopener noreferrer" class="hover:text-sky-600 dark:hover:text-sky-400 underline">

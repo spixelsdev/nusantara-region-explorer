@@ -12,11 +12,13 @@ import {
   Check, 
   Copy,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Calculator
 } from 'lucide-vue-next';
 import { downloadJsonFile, downloadCsvFile } from '../utils/codeSnippet';
 
 const store = useRegionStore();
+const emit = defineEmits(['calculate-bos']);
 
 const schools = ref<SchoolItem[]>([]);
 const totalData = ref(0);
@@ -122,8 +124,17 @@ const getMapsUrl = (s: SchoolItem) => {
         </p>
       </div>
 
-      <!-- Action Buttons (Export) -->
+      <!-- Action Buttons (Export & BOS) -->
       <div class="flex items-center gap-2 shrink-0">
+        <button 
+          @click="emit('calculate-bos', null)"
+          class="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded bg-amber-500 hover:bg-amber-600 text-white transition-colors"
+          title="Buka Kalkulator BOS"
+        >
+          <Calculator class="w-3.5 h-3.5" />
+          <span>Kalkulator BOS</span>
+        </button>
+
         <button 
           @click="exportSchoolJson"
           class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
@@ -277,18 +288,23 @@ const getMapsUrl = (s: SchoolItem) => {
             </p>
           </div>
 
-          <!-- Card Footer (Google Maps Link) -->
-          <div class="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px]">
-            <span class="text-slate-400 font-mono text-[10px] truncate max-w-[150px]">
-              {{ s.propinsi }}
-            </span>
+          <!-- Card Footer (Google Maps & Hitung BOS Link) -->
+          <div class="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] gap-2">
+            <button 
+              @click="emit('calculate-bos', s)"
+              class="flex items-center gap-1 text-amber-600 dark:text-amber-400 hover:underline font-semibold text-[11px]"
+            >
+              <Calculator class="w-3 h-3" />
+              <span>Estimasi BOS</span>
+            </button>
+
             <a 
               :href="getMapsUrl(s)" 
               target="_blank" 
               rel="noopener noreferrer"
               class="flex items-center gap-1 text-sky-600 dark:text-sky-400 hover:underline font-semibold shrink-0"
             >
-              <span>Lihat Maps</span>
+              <span>Maps</span>
               <ExternalLink class="w-3 h-3" />
             </a>
           </div>
